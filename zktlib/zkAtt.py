@@ -30,7 +30,7 @@ def acmOK(self):
 
 def reverseHex(hexstr):
     tmp = ''
-    for i in reversed(xrange(len(hexstr) / 2)):
+    for i in reversed(range(len(hexstr) / 2)):
         tmp += hexstr[i * 2:(i * 2) + 2]
 
     return tmp
@@ -55,11 +55,11 @@ def zkAtt(self):
     # print "unpack HcHc :7", unpack('HcHc',self.data_recv[:7])
     # print "unpack HHHH :8", unpack('HHHH',self.data_recv[:8])
     # print "unpack HHHH :8 [1]", unpack('4H',self.data_recv[:8])[0]
-    print "size", sys.getsizeof(self.data_recv)
-    print "size", len(self.data_recv)
+    #print ("size", __file__, sys.getsizeof(self.data_recv))
+    #print ("size", __file__, len(self.data_recv))
     lensi = len(self.data_recv) / 2
     fstri = str(lensi) + "H"
-    print "unpack 4I  ", unpack(fstri, self.data_recv)
+    #print ("unpack 4I  ", unpack(fstri, self.data_recv))
     # print "unpack 8H", unpack('8H', self.data_recv)
     # print "unpack I 8:12 [0]", unpack ('I', self.data_recv[8:12])[0]
 
@@ -67,23 +67,23 @@ def zkAtt(self):
     self.data_recv, addr = self.zkclient.recvfrom(1024)
 
     if unpack('4H', self.data_recv[:8])[0] == CMD_PREPARE_DATA:
-        print "received CMD_PREPARE_DATA"
+        print ("received CMD_PREPARE_DATA")
         size = unpack('I', self.data_recv[8:12])[0]
 
         wa = unpack('II', self.data_recv[:8])[0]
-        print "received ", wa
-        print 'Receiving %s %s' % (size, "bytes")
+        print ("received ", wa)
+        print ('Receiving %s %s' % (size, "bytes"))
         try:
 
             data_recv, addr = self.zkclient.recvfrom(size)
-            print "size of data_recv", sys.getsizeof(data_recv)
+            print ("size of data_recv", sys.getsizeof(data_recv))
             self.attendancedata.append(data_recv)
             acmOK(self)
-            print unpack('24s1s4s11s', self.data_recv.ljust(40)[:40])
+            print (unpack('24s1s4s11s', self.data_recv.ljust(40)[:40]))
 
         except:
 
-            print "socket timeout 1 - no more data to receive"
+            print ("socket timeout 1 - no more data to receive")
 
         while unpack('4H', self.data_recv[:8])[0] != 2000 or unpack('4H', self.data_recv[:8])[0] == 1501:
 
@@ -91,11 +91,11 @@ def zkAtt(self):
 
                 data_recv, addr = self.zkclient.recvfrom(size)
                 acmOK(self)
-                print unpack('24s1s4s11s', self.data_recv.ljust(40)[:40])
+                print (unpack('24s1s4s11s', self.data_recv.ljust(40)[:40]))
 
             except:
 
-                print "socket timeout 2 - no more data to receive"
+                print ("socket timeout 2 - no more data to receive")
                 self.attendancedata.append(data_recv)
                 acmOK(self)
                 break
@@ -108,60 +108,61 @@ def zkAtt(self):
 
             if unpack('4H', self.data_recv[:8])[0] == CMD_PREPARE_DATA:
 
-                print "received CMD_PREPARE_DATA"
+                print ("received CMD_PREPARE_DATA")
                 size = unpack('I', self.data_recv[8:12])[0]
-                print 'Receiving %s %s' % (size, "bytes")
+                print ('Receiving %s %s' % (size, "bytes"))
 
             elif unpack('4H', data_recv[:8])[0] == 1501:
-                print "receiving Data packet"
+                print ("receiving Data packet")
 
             elif unpack('4H', self.data_recv[:8])[0] == 2000:
-                print "received CMD_ACK_OK"
+                print ("received CMD_ACK_OK")
                 try:
 
                     self.data_recv, addr = self.zkclient.recvfrom(size)
                     acmOK(self)
                     # print len(self.data_recv)
                 except:
-                    print "socket timeout 3 - no more data to receive"
+                    print ("socket timeout 3 - no more data to receive")
 
             #self.data_recv, addr = self.zkclient.recvfrom(1024)
             # print "length of reiceived data packet", len(self.data_recv)
-            print "length", len(self.data_recv)
+            print ("length", len(self.data_recv))
             lens = len(self.data_recv) / 2
             fstr = str(lens) + "H"
 
-            print unpack(fstr, self.data_recv)
+            print (unpack(fstr, self.data_recv))
             if unpack('4H', self.data_recv[:8])[0] == 2000:
-                print "received CMD_ACK_OK"
+                print ("received CMD_ACK_OK")
                 try:
 
                     self.data_recv, addr = self.zkclient.recvfrom(4096)
                     # print len(self.data_recv)
                 except:
-                    print "socket timeout 4 - no more data to receive"
-        print "length of att data", len(self.attendancedata)
+                    print ("socket timeout 4 - no more data to receive")
+
+        print ("length of att data", len(self.attendancedata))
         #data_recv = self.zkclient.recvfrom(8)
 
-        for x in xrange(len(self.attendancedata)):
+        for x in range(len(self.attendancedata)):
 
-                                        # print self.attendancedata[x][8:]
-                                        #self.attendancedata[x] = self.attendancedata[x][8:]
-                                        # print self.attendancedata[x][0:]
+            # print self.attendancedata[x][8:]
+            # self.attendancedata[x] = self.attendancedata[x][8:]
+            # print self.attendancedata[x][0:]
             self.attendancedata[x] = self.attendancedata[x][0:]
 
             self.data_recv, addr = self.zkclient.recvfrom(1024)
 
             if unpack('4H', self.data_recv)[0] == 2000:
-                print "received CMD_ACK_OK"
+                print ("received CMD_ACK_OK")
                 try:
 
                     self.data_recv, addr = self.zkclient.recvfrom(1024)
 
                 except:
-                    print "socket timeout - no more data to receive"
+                    print ("socket timeout - no more data to receive")
 
-                    for x in xrange(len(self.attendancedata)):
+                    for x in range(len(self.attendancedata)):
 
                         self.attendancedata[x] = self.attendancedata[x][0:]
 
@@ -174,7 +175,7 @@ def zkAtt(self):
         attendancedata = attendancedata[14:]
         #attendancedata = attendancedata[14:]
 
-        print "len attendancedata", len(attendancedata)
+        print ("len attendancedata", len(attendancedata))
 
     while len(attendancedata):
 
@@ -191,7 +192,7 @@ def zkAtt(self):
 
         uid, state, timestamp, space = unpack(
             '24s1s4s11s', attendancedata.ljust(40)[:40])
-        print "%s, %s, %s, %s" % (uid, 1, ord(space[0]), decode_time(int(reverseHex(timestamp.encode('hex')), 16)))
+        print ("%s, %s, %s, %s" % (uid, 1, ord(space[0]), decode_time(int(reverseHex(timestamp.encode('hex')), 16))))
         # print "%s, %s, %s, %s" % (uid, ord(pls[0]), ord(space[0]), decode_time( int( reverseHex( timestamp.encode('hex') ), 16 ) ) )
         # print "%s, %s, %s, %s" % (uid, state, space, timestamp)
         #attendance.append( ( uid, ord(pls[0]), decode_time( int( reverseHex( timestamp.encode('hex') ), 16 ) ) ) )

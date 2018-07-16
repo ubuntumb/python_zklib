@@ -56,24 +56,25 @@ def decode_time(t):
     """Decode a timestamp retrieved from the timeclock
 
     copied from zkemsdk.c - DecodeTime"""
-    second = t % 60
+    second = int(t % 60)
     t = t / 60
 
-    minute = t % 60
+    minute = int(t % 60)
     t = t / 60
 
-    hour = t % 24
+    hour = int(t % 24)
     t = t / 24
 
-    day = t % 31+1
+    day = int(t % 31 + 1)
     t = t / 31
 
-    month = t % 12+1
+    month = int(t % 12 + 1)
     t = t / 12
 
-    year = t + 2000
+    year = int(t + 2000)
+
+    #print(year, month, day, hour, minute, second)
 
     d = datetime(year, month, day, hour, minute, second)
 
     return d
-    
