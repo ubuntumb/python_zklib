@@ -1,4 +1,3 @@
-from datetime import datetime, date
 
 USHRT_MAX = 65535
 
@@ -41,40 +40,3 @@ CMD_REFRESHDATA = 1013
 
 LEVEL_USER = 0
 LEVEL_ADMIN = 14
-
-def encode_time(t):
-    """Encode a timestamp send at the timeclock
-
-    copied from zkemsdk.c - EncodeTime"""
-    d = ( (t.year % 100) * 12 * 31 + ((t.month - 1) * 31) + t.day - 1) *\
-         (24 * 60 * 60) + (t.hour * 60 + t.minute) * 60 + t.second
-
-    return d
-
-
-def decode_time(t):
-    """Decode a timestamp retrieved from the timeclock
-
-    copied from zkemsdk.c - DecodeTime"""
-    second = int(t % 60)
-    t = t / 60
-
-    minute = int(t % 60)
-    t = t / 60
-
-    hour = int(t % 24)
-    t = t / 24
-
-    day = int(t % 31 + 1)
-    t = t / 31
-
-    month = int(t % 12 + 1)
-    t = t / 12
-
-    year = int(t + 2000)
-
-    #print(year, month, day, hour, minute, second)
-
-    d = datetime(year, month, day, hour, minute, second)
-
-    return d

@@ -34,7 +34,7 @@ class ZKLib:
     def __init__(self, ip, port):
         self.address = (ip, port)
         self.zkclient = socket(AF_INET, SOCK_DGRAM)
-        self.zkclient.settimeout(3)
+        self.zkclient.settimeout(10)
         self.session_id = 0
         self.userdata = []
         self.attendancedata = []
@@ -74,8 +74,12 @@ class ZKLib:
                                 command_string):
         """This function puts a the parts that make up a packet together and
         packs them into a byte string"""
+
+        if(isinstance(command_string, str)):
+            command_string = command_string.encode()
+
         buf = pack('HHHH', command, chksum,
-            session_id, reply_id) + command_string.encode()
+            session_id, reply_id) + command_string
 
         buf = unpack('8B'+'%sB' % len(command_string), buf)
 
@@ -86,7 +90,7 @@ class ZKLib:
             reply_id -= USHRT_MAX
 
         buf = pack('HHHH', command, chksum, session_id, reply_id)
-        return buf + command_string.encode()
+        return buf + command_string
 
 
     def checkValid(self, reply):
@@ -195,6 +199,7 @@ class ZKLib:
     def clearAttendance(self):
         return zkclearattendance(self)
 
+    @decode_result_bytes_to_string
     def setTime(self, t):
         return zksettime(self, t)
 

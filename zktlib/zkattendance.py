@@ -2,32 +2,10 @@ from struct import pack, unpack
 from datetime import datetime, date
 
 from zkconst import *
+from zkutils import reverseHex, decode_time, getPacketSize
 
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
-
-def getSizeAttendance(self):
-    """Checks a returned packet to see if it returned CMD_PREPARE_DATA,
-    indicating that data packets are to be sent
-
-    Returns the amount of bytes that are going to be sent"""
-    command = unpack('HHHH', self.data_recv[:8])[0]
-    
-    if command == CMD_PREPARE_DATA:
-        size = unpack('I', self.data_recv[8:12])[0]
-        return size
-    else:
-        return False
-
-
-def reverseHex(hexstr):
-    tmp = ''
-    range_iter = int(len(hexstr)/2)
-
-    for i in reversed( range(range_iter)):
-        tmp += hexstr[i*2:(i*2)+2]
-
-    return tmp
 
 def zkgetattendance(self):
     """Start a connection with the time clock"""
@@ -40,48 +18,49 @@ def zkgetattendance(self):
     buf = self.createHeader(command, chksum, session_id,
         reply_id, command_string)
     self.zkclient.sendto(buf, self.address)
-    #try:
-    self.data_recv, addr = self.zkclient.recvfrom(1024)
 
-    if getSizeAttendance(self):
-        bytes = getSizeAttendance(self)
-        while bytes > 0:
-            data_recv, addr = self.zkclient.recvfrom(1032)
-            self.attendancedata.append(data_recv)
-            bytes -= 1024
+    try:
+        self.data_recv, addr = self.zkclient.recvfrom(1024)
 
-        self.session_id = unpack('HHHH', self.data_recv[:8])[2]
-        data_recv = self.zkclient.recvfrom(8)
+        if getPacketSize(self):
+            bytes = getPacketSize(self)
+            while bytes > 0:
+                data_recv, addr = self.zkclient.recvfrom(1032)
+                self.attendancedata.append(data_recv)
+                bytes -= 1024
 
-    attendance = []
-    if len(self.attendancedata) > 0:
-        # The first 4 bytes don't seem to be related to the user
-        for x in range(len(self.attendancedata)):
-            if x > 0:
-                self.attendancedata[x] = self.attendancedata[x][8:]
+            self.session_id = unpack('HHHH', self.data_recv[:8])[2]
+            data_recv = self.zkclient.recvfrom(8)
 
-            attendancedata = self.attendancedata[x]
-            attendancedata = attendancedata[14:]
+        attendance = []
+        if len(self.attendancedata) > 0:
+            # The first 4 bytes don't seem to be related to the user
+            for x in range(len(self.attendancedata)):
+                if x > 0:
+                    self.attendancedata[x] = self.attendancedata[x][8:]
 
-            while len(attendancedata):
+                attendancedata = self.attendancedata[x]
+                attendancedata = attendancedata[14:]
 
-                uid, state, timestamp, space = unpack( '24s1s4s11s', attendancedata.ljust(40)[:40] )
+                while len(attendancedata):
 
-                # Clean up some messy characters from the user name
-                #uid = unicode(uid.strip('\x00|\x01\x10x'), errors='ignore')
-                uid = uid.split(b'\x00', 1)[0].decode(errors="ignore")
+                    uid, state, timestamp, space = unpack( '24s1s4s11s', attendancedata.ljust(40)[:40] )
 
-                #print(uid, state.hex(), decode_time( int(reverseHex(timestamp.hex()), 16)), space.hex())
-                #print "%s, %s, %s" % (uid, state, decode_time( int( reverseHex( timestamp.encode('hex') ), 16 ) ) )
+                    # Clean up some messy characters from the user name
+                    #uid = unicode(uid.strip('\x00|\x01\x10x'), errors='ignore')
+                    uid = uid.split(b'\x00', 1)[0].decode(errors="ignore")
 
-                attendance.append((uid, int( state.hex(), 16 ), decode_time( int( reverseHex(timestamp.hex()), 16 ) ) ) )
+                    #print(uid, state.hex(), decode_time( int(reverseHex(timestamp.hex()), 16)), space.hex())
+                    #print "%s, %s, %s" % (uid, state, decode_time( int( reverseHex( timestamp.encode('hex') ), 16 ) ) )
 
-                attendancedata = attendancedata[40:]
+                    attendance.append((uid, int( state.hex(), 16 ), decode_time( int( reverseHex(timestamp.hex()), 16 ) ) ) )
 
-        return attendance
-    #except Exception as e:
-    #    print("Error to get Attendance data ", e)
-    #    return False
+                    attendancedata = attendancedata[40:]
+
+            return attendance
+    except Exception as e:
+        print("Error to get Attendance data ", e)
+        return False
 
 
 def zkclearattendance(self):

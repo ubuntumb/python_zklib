@@ -4,24 +4,13 @@ import codecs
 from datetime import datetime, date
 
 from zkconst import *
-
-def getSizeUser(self):
-    """Checks a returned packet to see if it returned CMD_PREPARE_DATA,
-    indicating that data packets are to be sent
-
-    Returns the amount of bytes that are going to be sent"""
-    command = unpack('HHHH', self.data_recv[:8])[0]
-    if command == CMD_PREPARE_DATA:
-        size = unpack('I', self.data_recv[8:12])[0]
-        return size
-    else:
-        return False
+from zkutils import getPacketSize
 
 
 def zksetuser(self, uid, userid, name, password, role):
     """Start a connection with the time clock"""
     command = CMD_SET_USER
-    command_string = pack('sxs8s28ss7sx8s16s', chr( uid ), chr(role), password, name, chr(1), '', userid, '' )
+    command_string = pack('sxs8s28ss7sx8s16s', chr( uid ).encode(), chr(role).encode(), password.encode(), name.encode(), chr(1).encode(), b'', userid.encode(), b'' )
     chksum = 0
     session_id = self.session_id
     reply_id = unpack('HHHH', self.data_recv[:8])[3]
@@ -34,7 +23,8 @@ def zksetuser(self, uid, userid, name, password, role):
         self.data_recv, addr = self.zkclient.recvfrom(1024)
         self.session_id = unpack('HHHH', self.data_recv[:8])[2]
         return self.data_recv[8:]
-    except:
+    except Exception as e:
+        print ('Error to set User, ', e)
         return False
 
 
@@ -55,8 +45,8 @@ def zkgetuser(self):
     try:
         self.data_recv, addr = self.zkclient.recvfrom(1024)
 
-        if getSizeUser(self):
-            bytes = getSizeUser(self)
+        if getPacketSize(self):
+            bytes = getPacketSize(self)
 
             while bytes > 0:
                 data_recv, addr = self.zkclient.recvfrom(1032)
@@ -95,7 +85,7 @@ def zkgetuser(self):
 
         return users
     except Exception as e:
-        print('Error to get User data', e)
+        print('Error to get User data, ', e)
         return False
 
 
@@ -142,7 +132,7 @@ def zkenrolluser(self, uid):
     '''Start Remote Fingerprint Enrollment'''
 
     command = CMD_STARTENROLL
-    command_string = pack('2s', uid)
+    command_string = pack('2s', uid.encode())
     chksum = 0
     session_id = self.session_id
     reply_id = unpack('HHHH', self.data_recv[:8])[3]
@@ -155,6 +145,6 @@ def zkenrolluser(self, uid):
         self.data_recv, addr = self.zkclient.recvfrom(1024)
         self.session_id = unpack('HHHH', self.data_recv[:8])[2]
         return self.data_recv[8:]
-    except:
-        print ("failed", __file__, self.data_recv)
+    except Exception as e :
+        print ("Error Enroll User, ", e)
         return False

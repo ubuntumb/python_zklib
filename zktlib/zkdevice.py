@@ -57,7 +57,8 @@ def zkrestart(self):
         self.data_recv, addr = self.zkclient.recvfrom(1024)
         self.session_id = unpack('HHHH', self.data_recv[:8])[2]
         return self.data_recv[8:]
-    except:
+    except Exception as e:
+        print('Error to restart device, ', e)
         return False
 
 def zkenabledevice(self):
