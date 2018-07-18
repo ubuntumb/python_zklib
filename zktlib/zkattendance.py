@@ -35,27 +35,25 @@ def zkgetattendance(self):
         attendance = []
         if len(self.attendancedata) > 0:
             # The first 4 bytes don't seem to be related to the user
+            print('att len', len(self.attendancedata))
             for x in range(len(self.attendancedata)):
                 if x > 0:
                     self.attendancedata[x] = self.attendancedata[x][8:]
 
-                attendancedata = self.attendancedata[x]
-                attendancedata = attendancedata[14:]
+            attendancedata = bytearray(self.attendancedata[0])
+            for att in self.attendancedata[1:] :
+                attendancedata = attendancedata + att
 
-                while len(attendancedata):
+            attendancedata = attendancedata[14:]
+            print('size att', len(attendancedata))
+            while len(attendancedata):
 
-                    uid, state, timestamp, space = unpack( '24s1s4s11s', attendancedata.ljust(40)[:40] )
+                uid, state, timestamp, space =  unpack( '24s1s4s11s', attendancedata.ljust(40)[:40] )
+                uid = uid.split(b'\x00', 1)[0].decode(errors="ignore")  # Clean up some messy characters from the user name
 
-                    # Clean up some messy characters from the user name
-                    #uid = unicode(uid.strip('\x00|\x01\x10x'), errors='ignore')
-                    uid = uid.split(b'\x00', 1)[0].decode(errors="ignore")
+                attendance.append((uid, int( state.hex(), 16 ), decode_time( int( reverseHex(timestamp.hex()), 16 ) ) ) )
 
-                    #print(uid, state.hex(), decode_time( int(reverseHex(timestamp.hex()), 16)), space.hex())
-                    #print "%s, %s, %s" % (uid, state, decode_time( int( reverseHex( timestamp.encode('hex') ), 16 ) ) )
-
-                    attendance.append((uid, int( state.hex(), 16 ), decode_time( int( reverseHex(timestamp.hex()), 16 ) ) ) )
-
-                    attendancedata = attendancedata[40:]
+                attendancedata = attendancedata[40:]
 
             return attendance
     except Exception as e:

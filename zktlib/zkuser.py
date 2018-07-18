@@ -63,25 +63,29 @@ def zkgetuser(self):
                 if x > 0:
                     self.userdata[x] = self.userdata[x][8:]
 
-                userdata = self.userdata[x]
-                userdata = userdata[11:]
+            userdata = bytearray(self.userdata[0])
+            
+            for usr in self.userdata[1:]:
+                userdata = userdata + usr
 
-                while len(userdata) > 72:
+            userdata = userdata[11:]
 
-                    uid, role, password, name, userid = unpack( '2s2s8s28sx31s', userdata.ljust(72)[:72] )
-                    uid = int(uid.hex(),16)
-                    name = name.split(b'\x00', 1)[0].decode(errors="ignore") # Clean up some messy characters from the user name
-                    password = password.strip(b'\x00|\x01\x10x').decode(errors='ignore')
-                    userid = userid.strip(b'\x00|\x01\x10x').decode(errors='ignore')
-                    role = int(role.hex(), 16)
+            while len(userdata) > 72:
 
-                    #print(uid, name, role , password, userid)
+                uid, role, password, name, userid = unpack( '2s2s8s28sx31s', userdata.ljust(72)[:72] )
+                uid = int(uid.hex(),16)
+                name = name.split(b'\x00', 1)[0].decode(errors="ignore") # Clean up some messy characters from the user name
+                password = password.strip(b'\x00|\x01\x10x').decode(errors='ignore')
+                userid = userid.strip(b'\x00|\x01\x10x').decode(errors='ignore')
+                role = int(role.hex(), 16)
 
-                    if name.strip() == "":
-                        name = uid
+                #print(uid, name, role , password, userid)
 
-                    users[uid] = (userid, name, role, password)
-                    userdata = userdata[72:]
+                if name.strip() == "":
+                    name = uid
+
+                users[uid] = (userid, name, role, password)
+                userdata = userdata[72:]
 
         return users
     except Exception as e:

@@ -60,8 +60,8 @@ if ret == True:
             else:
                 state = 'Undefined'
 
-            #print('att', lattendance)
-            print ("date %s, Jam %s: %s, Status: %s" % ( lattendance[2].date(), lattendance[2].time(), lattendance[0], state ))
+            print('att', lattendance)
+            #print ("date %s, Jam %s: %s, Status: %s" % ( lattendance[2].date(), lattendance[2].time(), lattendance[0], state ))
 
     # print "Clear Attendance:", zk.clearAttendance()
 
