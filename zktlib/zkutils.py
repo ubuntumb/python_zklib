@@ -28,19 +28,19 @@ def decode_time(t):
     copied from zkemsdk.c - DecodeTime"""
 
     second = int(t % 60)
-    t = t / 60
+    t = t // 60
 
     minute = int(t % 60)
-    t = t / 60
+    t = t // 60
 
     hour = int(t % 24)
-    t = t / 24
+    t = t // 24
 
     day = int(t % 31 + 1)
-    t = t / 31
+    t = t // 31
 
     month = int(t % 12 + 1)
-    t = t / 12
+    t = t // 12
 
     year = int(t + 2000)
 
@@ -61,3 +61,38 @@ def getPacketSize(obj_sent):
         return size
     else:
         return False
+
+def make_commkey(key, session_id, ticks=50):
+    """take a password and session_id and scramble them to send to the time
+    clock.
+    copied from commpro.c - MakeKey"""
+    key = int(key)
+    session_id = int(session_id)
+    k = 0
+    for i in range(32):
+        if (key & (1 << i)):
+            k = (k << 1 | 1)
+        else:
+            k = k << 1
+    k += session_id
+
+    k = pack(b'I', k)
+    k = unpack(b'BBBB', k)
+    k = pack(
+        b'BBBB',
+        k[0] ^ ord('Z'),
+        k[1] ^ ord('K'),
+        k[2] ^ ord('S'),
+        k[3] ^ ord('O'))
+    k = unpack(b'HH', k)
+    k = pack(b'HH', k[1], k[0])
+
+    B = 0xff & ticks
+    k = unpack(b'BBBB', k)
+    k = pack(
+        b'BBBB',
+        k[0] ^ B,
+        k[1] ^ B,
+        B,
+        k[3] ^ B)
+    return k

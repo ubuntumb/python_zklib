@@ -36,6 +36,7 @@ class ZKLib:
         self.zkclient = socket(AF_INET, SOCK_DGRAM)
         self.zkclient.settimeout(10)
         self.session_id = 0
+        self.reply_id = 0
         self.userdata = []
         self.attendancedata = []
 
@@ -98,8 +99,9 @@ class ZKLib:
         indicating success"""
         command = unpack('HHHH', reply[:8])[0]
 
-        if command == CMD_ACK_OK:
-            print ("CMD_ACK_OK")
+        if command == CMD_AUTH:
+            return zkconnect_with_pass(self,0)
+        elif command == CMD_ACK_OK:
             return True
         else:
             return False
@@ -107,10 +109,14 @@ class ZKLib:
     def decode_result_bytes_to_string(func):
         def verify_value_result(*args, **kwargs):
             result = func(*args, **kwargs)
-            if(isinstance(result, bytes)):
-                return result.decode()
-            else:
-                return result
+
+            try:
+                if(isinstance(result, bytes)):
+                    return result.decode()
+            except Exception as e:
+                print('Error to decode value ', e)
+
+            return result
         return verify_value_result
 
     def connect(self):
