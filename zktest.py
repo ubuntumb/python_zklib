@@ -36,15 +36,15 @@ if ret == True:
 
     data_user = zk.getUser()
     print ("User size:", len(data_user))
-    print ("Get User:", data_user[0])
-    #if data_user:
-    #    for uid in data_user:
+    #print ("Get User:", data_user)
+    if data_user:
+        for uid in data_user:
 
-    #        if data_user[uid][2] == 14:
-    #            level = 'Admin'
-    #        else:
-    #            level = 'User'
-    #        print ( "[UID %d]: ID: %s, Name: %s, Level: %s, Password: %s" % ( uid, data_user[uid][0], data_user[uid][1], level, data_user[uid][3]  ) )
+            if data_user[uid][2] == 14:
+                level = 'Admin'
+            else:
+                level = 'User'
+            print ( "[UID %d]: ID: %s, Name: %s, Level: %s, Password: %s" % ( uid, data_user[uid][0], data_user[uid][1], level, data_user[uid][3]  ) )
             #print(uid, data_user[uid])
 
         #zk.setUser(uid=61, userid='41', name='Dony Wahyu Isp', password='123456', role=zkconst.LEVEL_ADMIN)

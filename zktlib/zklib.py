@@ -99,7 +99,9 @@ class ZKLib:
         indicating success"""
         command = unpack('HHHH', reply[:8])[0]
 
-        if command == CMD_AUTH:
+        print('COMMNAD', command)
+
+        if command == CMD_ACK_UNAUTH:
             return zkconnect_with_pass(self,0)
         elif command == CMD_ACK_OK:
             return True
