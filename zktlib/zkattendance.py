@@ -13,7 +13,7 @@ def zkgetattendance(self):
     command_string = ''
     chksum = 0
     session_id = self.session_id
-    reply_id = self.reply_id  # unpack('HHHH', self.data_recv[:8])[3]
+    reply_id = unpack('HHHH', self.data_recv[:8])[3]
 
     buf = self.createHeader(command, chksum, session_id,
         reply_id, command_string)
