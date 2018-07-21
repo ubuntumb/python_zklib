@@ -35,17 +35,17 @@ def zkgetattendance(self):
         attendance = []
         if len(self.attendancedata) > 0:
             # The first 4 bytes don't seem to be related to the user
-            print('att len', len(self.attendancedata))
             for x in range(len(self.attendancedata)):
                 if x > 0:
                     self.attendancedata[x] = self.attendancedata[x][8:]
 
             attendancedata = bytearray(self.attendancedata[0])
+            
             for att in self.attendancedata[1:] :
                 attendancedata = attendancedata + att
 
             attendancedata = attendancedata[14:]
-            print('size att', len(attendancedata))
+
             while len(attendancedata):
 
                 uid, state, timestamp, space =  unpack( '24s1s4s11s', attendancedata.ljust(40)[:40] )

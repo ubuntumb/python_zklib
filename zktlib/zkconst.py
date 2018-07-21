@@ -1,3 +1,10 @@
+DATABASE_CONFIG = {
+    'host': 'localhost',
+    'dbname': 'test',
+    'user': 'postgres',
+    'password': '',
+    'port': 5432
+}
 
 USHRT_MAX = 65535
 

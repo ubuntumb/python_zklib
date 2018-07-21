@@ -1,8 +1,47 @@
 from struct import pack, unpack
 from datetime import datetime, date
 from math import ceil
+import psycopg2 as pg
 
 from zkconst import *
+
+class DefaultConnection(object):
+    """ Connection Object, default POSTGRESQL"""
+
+    def __init__(self, path_config_file):
+
+        try:
+            self.cn = pg.connect(**DATABASE_CONFIG)
+        except Exception as e:
+            raise Exception(" Fail to connect, ", e)
+
+    def get_connection(self):
+        """ Get connect to the Database server """
+        return self.cn
+
+    def close_connection(self):
+        """ Close connection """
+        if self.cn is not None:
+            self.cn.close()
+
+    def execute_query_to_db(self, query="SELECT version()", params=[]):
+        """ Execute query and return cursor """
+        cur = self.cn.cursor()
+        cur.execute(query, params)
+
+        return cur
+
+    def get_result_to_dicts(self, cursor):
+        """ Get rows to dicts format """
+        field_names = [name[0].lower() for name in cursor.description]
+
+        while True:
+            rows = cursor.fetchmany()
+            if not rows:
+                return
+            for row in rows:
+                yield dict(zip(field_names, row))
+
 
 def reverseHex(hexstr):
     tmp = ''

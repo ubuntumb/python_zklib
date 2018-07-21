@@ -6,7 +6,6 @@ import time
 from datetime import datetime
 import zkconst
 
-#print(dir(zkt))
 
 zk = zkt.ZKLib("192.168.1.201", 4370)
 
@@ -68,8 +67,9 @@ if ret == True:
 
     #zk.setUser(67, '67', 'Shubhamoy Chakrabarty', '', 0)
     #zk.enrollUser('67')
-    #print ("Set Time:", zk.setTime(datetime.now()))
-    print ("Get Time:", zk.getTime())
     print ("Enable Device", zk.enableDevice())
+    print ("Set Time:", zk.setTime(datetime.now()))
+    print ("Get Time:", zk.getTime())
+
     #print("Restart Device", zk.restartDevice())
     print ("Disconnect:", zk.disconnect())
